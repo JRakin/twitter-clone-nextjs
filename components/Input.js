@@ -34,7 +34,7 @@ function Input() {
     };
   };
   return (
-    <div className="overflow-y-scroll border-gray-700 flex space-x-3 border-b">
+    <div className="overflow-y-scroll scrollbar-hide border-gray-700 flex space-x-3 border-b">
       <div className="w-full divide-y divide-gray-700">
         <div
           className={`${selectedFile && "pb-7"} ${valueInput && "space-y-3"}`}
@@ -97,6 +97,9 @@ function Input() {
 
             {showEmojis && (
               <Picker
+                showSkinTones={false}
+                showPreview={false}
+                set="twitter"
                 onSelect={addEmoji}
                 style={{
                   position: "absolute",

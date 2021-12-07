@@ -15,4 +15,10 @@
   .icon {
     @apply cursor-pointer h-9 w-9 hover:bg-[#1d9bf0] hover:bg-opacity-10 flex items-center justify-center rounded-full transition ease-out;
   }
+  .scrollbar-hide::-webkit-scrollbar {
+    @apply hidden;
+  }
+  .emoji-mart-preview {
+    @apply hidden;
+  }
 }
