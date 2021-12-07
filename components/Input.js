@@ -1,4 +1,5 @@
 import {
+  faCalendar,
   faChartBar,
   faImage,
   faSmile,
@@ -6,14 +7,19 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
+import { db, storage } from "../utils/firebaseConfig";
+import { addDoc, collection, serverTimestamp } from "@firebase/firestore";
 
 function Input() {
   const [valueInput, setValueInput] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const filePicker = useRef(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
   const addEmoji = (e) => {
     let sym = e.unified.split("-");
@@ -21,6 +27,16 @@ function Input() {
     sym.forEach((el) => codeArray.push("0x" + el));
     let emoji = String.fromCodePoint(...codeArray);
     setValueInput(valueInput + emoji);
+  };
+
+  const addPost = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    const docRef = await addDoc(collection(db, "posts"), {
+      text: valueInput,
+      timestamp: serverTimestamp(),
+    });
   };
 
   const addImageToPost = (e) => {
@@ -41,12 +57,10 @@ function Input() {
         >
           <textarea
             value={valueInput}
-            className="w-full bg-transparent outline-none text-[#d9d9d9] text-lg tracking-wide p-2 min-h-[50px]"
-            rows="2"
+            className="w-full bg-transparent scrollbar-hide outline-none text-[#d9d9d9] text-lg tracking-wide p-2 min-h-[50px]"
+            rows="3"
             onChange={(e) => setValueInput(e.target.value)}
             placeholder="what's happening?"
-            name=""
-            id=""
           />
           {selectedFile && (
             <div className="relative p-2">
@@ -91,6 +105,12 @@ function Input() {
             <div className="icon" onClick={() => setShowEmojis(!showEmojis)}>
               <FontAwesomeIcon
                 icon={faSmile}
+                className="text-[22px] text-[#1d9bf0] cursor-pointer"
+              />
+            </div>
+            <div className="icon">
+              <FontAwesomeIcon
+                icon={faCalendar}
                 className="text-[22px] text-[#1d9bf0] cursor-pointer"
               />
             </div>
