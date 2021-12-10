@@ -8,10 +8,18 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
 import { db, storage } from "../utils/firebaseConfig";
-import { addDoc, collection, serverTimestamp } from "@firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "@firebase/firestore";
+import { getDownloadURL, ref, uploadString } from "@firebase/storage";
 
 function Input() {
   const [valueInput, setValueInput] = useState("");
@@ -34,9 +42,29 @@ function Input() {
     setLoading(true);
 
     const docRef = await addDoc(collection(db, "posts"), {
+      id: session.user.uid,
+      username: session.user.name,
+      userImg: session.user.image,
+      tag: session.user.tag,
       text: valueInput,
       timestamp: serverTimestamp(),
     });
+
+    const imageRef = ref(storage, `posts/${docRef.id}/image`);
+
+    if (selectedFile) {
+      await uploadString(imageRef, selectedFile, "data_url").then(async () => {
+        const downloadURL = await getDownloadURL(imageRef);
+        await updateDoc(doc(db, "posts", docRef.id), {
+          image: downloadURL,
+        });
+      });
+    }
+
+    setLoading(false);
+    setSelectedFile(null);
+    setValueInput("");
+    setShowEmojis(false);
   };
 
   const addImageToPost = (e) => {
@@ -50,7 +78,12 @@ function Input() {
     };
   };
   return (
-    <div className="overflow-y-scroll scrollbar-hide border-gray-700 flex space-x-3 border-b">
+    <div className="overflow-y-scroll p-3 scrollbar-hide border-gray-700 flex space-x-3 border-b">
+      <img
+        src={session.user.image}
+        className="w-11 h-11 rounded-full cursor-pointer"
+        // onClick={signOut}
+      />
       <div className="w-full divide-y divide-gray-700">
         <div
           className={`${selectedFile && "pb-7"} ${valueInput && "space-y-3"}`}
@@ -133,6 +166,7 @@ function Input() {
             )}
           </div>
           <button
+            onClick={addPost}
             disabled={!valueInput.trim() && !selectedFile}
             className="bg-[#1d9bf0] text-white rounded-full px-4 py-1.5 font-bold shadow-md hover:bg-[#1a8cd8] disabled:hover:bg-[#1d9bf0] disabled:opacity-50 disabled:cursor-default"
           >
