@@ -3,7 +3,6 @@ import {
   faCommentDots,
   faEllipsisH,
   faHeart,
-  faReply,
   faReplyAll,
   faShare,
   faTrash,
@@ -22,11 +21,11 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import Moment from "react-moment";
 import { useState } from "react/cjs/react.development";
 import { db } from "../utils/firebaseConfig";
 import { useRecoilState } from "recoil";
 import { modalState, postIdState } from "../atoms/modalAtom";
+import Moment from "react-moment";
 
 function Post({ id, post, postPage }) {
   const { data: session } = useSession();
@@ -99,7 +98,7 @@ function Post({ id, post, postPage }) {
                   !postPage && "inline-block"
                 }`}
               >
-                {post?.username}
+                {post?.username}{" "}
               </h4>
               <span
                 className={`text-sm sm:text-[15px] ${!postPage && "ml-1.5"}`}
@@ -108,6 +107,7 @@ function Post({ id, post, postPage }) {
               </span>
             </div>
             <span className="hover:underline text-sm sm:text-[15px]">
+              {" "}
               <Moment fromNow>{post?.timestamp?.toDate()}</Moment>
             </span>
             {!postPage && (
@@ -128,7 +128,7 @@ function Post({ id, post, postPage }) {
         )}
         <img
           src={post?.image}
-          alt=""
+          alt="post"
           className="rounded-2xl max-h-[700px] object-cover mr-2"
         />
         <div
